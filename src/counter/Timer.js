@@ -1,86 +1,49 @@
-import React, { useState, useEffect, useRef } from 'react';
-import './Timer.css';
+import React, { useState, useEffect } from 'react';
 
-const Timer = ({ duration = 60, onComplete, warningThreshold = 10 }) => {
-    const [currentTime, setCurrentTime] = useState(new Date());
-    const [remainingTime, setRemainingTime] = useState(duration);
-    const [isComplete, setIsComplete] = useState(false);
-    const intervalRef = useRef(null);
-    const [isPaused, setIsPaused] = useState(false);
+const Timer = () => {
+  const [count, setCount] = useState(0);
+  const [interval, setIntervalValue] = useState(1000); // Начальный интервал - 1 секунда
+  const [inputInterval, setInputInterval] = useState(1000); // Для хранения значения из поля ввода
 
-    useEffect(() => {
-        if (isComplete || isPaused) {
-            return;
-        }
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCount((prevCount) => prevCount + 1);
+    }, interval);
 
-        intervalRef.current = setInterval(() => {
-            setCurrentTime(new Date());
-            setRemainingTime((prevTime) => {
-                const newTime = prevTime - 1;
-                if (newTime <= 0) {
-                    clearInterval(intervalRef.current);
-                    setIsComplete(true);
-                    if (onComplete) {
-                        onComplete();
-                    }
-                    return 0;
-                } else {
-                    return newTime;
-                }
-            });
-        }, 1000);
+    return () => clearInterval(timer); // Очистка таймера при размонтировании или изменении interval
+  }, [interval]); // Зависимость от interval - таймер перезапускается при изменении interval
 
-        return () => {
-            clearInterval(intervalRef.current);
-        };
-    }, [isComplete, onComplete, isPaused]);
+  const handleIntervalChange = (event) => {
+    setInputInterval(event.target.value);
+  };
 
-    const formattedTime = currentTime.toLocaleTimeString();
+  const handleSetInterval = () => {
+    // Проверка на число и положительное значение
+    const newInterval = parseInt(inputInterval, 10);
+    if (!isNaN(newInterval) && newInterval > 0) {
+      setIntervalValue(newInterval);
+    } else {
+      alert("Пожалуйста, введите корректное положительное число.");
+      setInputInterval(interval); // Возвращаем в поле ввода предыдущий интервал
+    }
+  };
 
-    const togglePause = () => {
-        setIsPaused(!isPaused);
-    };
 
-    const resetTimer = () => {
-        clearInterval(intervalRef.current);
-        setIsComplete(false);
-        setIsPaused(false);
-        setRemainingTime(duration);
-    };
-
-    const progress = ((duration - remainingTime) / duration) * 100; // Вычисляем прогресс в процентах
-
-    return (
-        <div className="timer-container">
-            <h2 className="timer-heading">Текущее время: {formattedTime}</h2>
-            {isComplete ? (
-                <h2 className="timer-expired timer-heading">Время истекло!</h2>
-            ) : (
-                <>
-                    <div className="timer-progress-bar-container">
-                        <div
-                            className="timer-progress-bar"
-                            style={{ width: `${progress}%` }}
-                        ></div>
-                    </div>
-                    <p
-                        className={`timer-time ${remainingTime <= warningThreshold ? 'timer-warning' : ''
-                            }`}
-                    >
-                        Осталось: {remainingTime} сек.
-                    </p>
-                    <div className="timer-controls">
-                        <button className="timer-button" onClick={togglePause}>
-                            {isPaused ? 'Продолжить' : 'Пауза'}
-                        </button>
-                        <button className="timer-button" onClick={resetTimer}>
-                            Сброс
-                        </button>
-                    </div>
-                </>
-            )}
-        </div>
-    );
+  return (
+    <div>
+      <h1>Счетчик: {count}</h1>
+      <div>
+        <label htmlFor="interval">Интервал (мс):</label>
+        <input
+          type="number"
+          id="interval"
+          value={inputInterval}
+          onChange={handleIntervalChange}
+        />
+        <button onClick={handleSetInterval}>Установить интервал</button>
+      </div>
+    </div>
+  );
 };
 
 export default Timer;
