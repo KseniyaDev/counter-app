@@ -1,25 +1,23 @@
-import logo from './logo.svg';
+import React from 'react';
+import Counter from './Counter';
+import Timer from './Timer';
 import './App.css';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const handleTimerComplete = () => {
+        alert('Таймер завершен!');
+    };
+
+    return (
+        <div className="App">
+            <header className="App-header">
+                <h1>Пример счетчика</h1>
+                <Counter /> {/* Счетчик здесь! */}
+                <Timer duration={30} onComplete={handleTimerComplete} warningThreshold={5} />
+            </header>
+        </div>
+    );
 }
 
 export default App;
+
